@@ -90,7 +90,7 @@ sudo apt-get install -y nodejs
 
 ### 방법 1: 브라우저 DB 모드 (권장 - 가장 간단)
 
-서버 없이 브라우저에서 모든 것이 실행됩니다. **PostgreSQL 설치 불필요!**
+서버 없이 브라우저에서 모든 것이 실행됩니다. **DB 설치 불필요!**
 
 #### Step 1: 저장소 클론
 
@@ -157,45 +157,43 @@ npm run dev
 
 ---
 
-### 방법 2: PostgreSQL API 모드 (대용량 데이터용)
+### 방법 2: MySQL API 모드 (대용량 데이터용)
 
-53만 건 전체 데이터를 빠르게 처리하려면 PostgreSQL 사용을 권장합니다.
+53만 건 전체 데이터를 빠르게 처리하려면 MySQL 사용을 권장합니다.
 
-#### Step 1: PostgreSQL 설치
+#### Step 1: MySQL 설치
 
 **Windows:**
 ```powershell
 # Chocolatey 사용
-choco install postgresql
+choco install mysql
 
 # 또는 공식 설치 프로그램
-# https://www.postgresql.org/download/windows/
+# https://dev.mysql.com/downloads/installer/
 ```
 
 **macOS:**
 ```bash
-brew install postgresql@15
-brew services start postgresql@15
+brew install mysql
+brew services start mysql
 ```
 
 **Linux (Ubuntu/Debian):**
 ```bash
 sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo systemctl start postgresql
+sudo apt install mysql-server
+sudo systemctl start mysql
 ```
 
 #### Step 2: 데이터베이스 생성
 
 ```bash
-# PostgreSQL 접속
-sudo -u postgres psql
+# MySQL 접속
+mysql -u root -p
 
-# 데이터베이스 및 사용자 생성
-CREATE DATABASE sql_study;
-CREATE USER sql_user WITH ENCRYPTED PASSWORD 'your_password';
-GRANT ALL PRIVILEGES ON DATABASE sql_study TO sql_user;
-\q
+# 데이터베이스 생성
+CREATE DATABASE naver_financial CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+exit;
 ```
 
 #### Step 3: 저장소 클론 및 설정
@@ -216,9 +214,9 @@ cp .env.example .env
 ```env
 # 데이터베이스 설정
 DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=sql_study
-DB_USER=sql_user
+DB_PORT=3306
+DB_NAME=naver_financial
+DB_USER=root
 DB_PASSWORD=your_password
 
 # 서버 설정
@@ -230,33 +228,23 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 SESSION_SECRET=random_session_secret_string
 ```
 
-#### Step 5: 데이터 임포트
+#### Step 5: 테이블 생성 및 데이터 임포트
 
 ```bash
-# CSV 데이터를 PostgreSQL로 임포트
-psql -U sql_user -d sql_study -c "
-CREATE TABLE stores (
-    상가업소번호 VARCHAR(50) PRIMARY KEY,
-    상호명 VARCHAR(200),
-    지점명 VARCHAR(100),
-    상권업종대분류코드 VARCHAR(10),
-    상권업종대분류명 VARCHAR(50),
-    상권업종중분류코드 VARCHAR(10),
-    상권업종중분류명 VARCHAR(50),
-    상권업종소분류코드 VARCHAR(10),
-    상권업종소분류명 VARCHAR(100),
-    시도명 VARCHAR(20),
-    시군구명 VARCHAR(20),
-    행정동명 VARCHAR(50),
-    법정동명 VARCHAR(50),
-    도로명주소 VARCHAR(200),
-    경도 DECIMAL(10, 6),
-    위도 DECIMAL(10, 6)
-);
-"
+# MySQL 접속
+mysql -u root -p naver_financial
 
-# CSV 임포트 (COPY 명령 사용)
-psql -U sql_user -d sql_study -c "\COPY stores FROM 'public/data/store_data.csv' WITH CSV HEADER"
+# 테이블은 docker/init.sql 참고하여 생성
+# 또는 Docker Compose 사용 시 자동 생성됨
+
+# CSV 임포트 (MySQL)
+LOAD DATA LOCAL INFILE 'public/data/store_data.csv'
+INTO TABLE stores
+CHARACTER SET utf8mb4
+FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
 ```
 
 #### Step 6: 서버 실행
@@ -457,7 +445,7 @@ file public/data/store_data.csv
 #### 3. 브라우저에서 느린 로딩
 
 - 대용량 CSV 파일 사용 시 브라우저 DB 모드는 초기 로딩이 오래 걸림
-- **해결**: PostgreSQL API 모드 사용 권장
+- **해결**: MySQL API 모드 또는 Docker Compose 사용 권장
 
 #### 4. Monaco Editor 로딩 안됨
 
@@ -620,7 +608,7 @@ export const quizProblems = [
 | 기술 | 용도 |
 |------|------|
 | Express.js | API 서버 |
-| PostgreSQL | 데이터베이스 |
+| MySQL | 데이터베이스 |
 | Google OAuth | 인증 |
 
 ### 브라우저 DB 모드
@@ -752,7 +740,7 @@ sql-study/
 ├── public/
 │   └── data/
 │       └── store_data.csv         # 상가정보 CSV (별도 다운로드 필요)
-├── server/                        # API 서버 (PostgreSQL 모드)
+├── server/                        # API 서버 (MySQL 모드)
 │   ├── server.js                  # Express 서버
 │   ├── package.json               # 서버 의존성
 │   └── .env.example               # 환경 변수 템플릿
