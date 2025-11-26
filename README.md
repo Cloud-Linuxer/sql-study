@@ -801,12 +801,12 @@ sql-study/
 - [x] 예제 쿼리 라이브러리
 - [x] 쿼리 히스토리
 - [x] 다크 모드
-- [x] PostgreSQL API 모드
+- [x] MySQL API 모드
+- [x] Docker Compose 지원
 - [ ] 추가 학습 문제 (Level 6)
 - [ ] 쿼리 결과 시각화 (차트)
 - [ ] 쿼리 공유 기능
 - [ ] 모바일 반응형 개선
-- [ ] Docker Compose 지원
 
 ---
 
