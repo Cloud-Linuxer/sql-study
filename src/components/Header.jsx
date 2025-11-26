@@ -10,10 +10,10 @@ export default function Header({ darkMode, toggleDarkMode }) {
               </svg>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  라니를 위한 쿼리테스트 플랫폼
+                  SQL 쿼리 학습 플랫폼
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  SQL Query Practice for Rani
+                  Interactive SQL Query Practice
                 </p>
               </div>
             </div>
