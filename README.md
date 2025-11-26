@@ -47,6 +47,452 @@
 
 ---
 
+## 🚀 빠른 시작 가이드 (다른 사람을 위한 상세 설치 방법)
+
+### 사전 요구사항
+
+이 프로젝트를 실행하기 위해 필요한 것들:
+
+| 요구사항 | 버전 | 확인 방법 |
+|---------|------|----------|
+| **Node.js** | 18.0.0 이상 | `node --version` |
+| **npm** | 9.0.0 이상 | `npm --version` |
+| **Git** | 최신 버전 | `git --version` |
+
+#### Node.js 설치 (미설치 시)
+
+**Windows:**
+```powershell
+# winget 사용
+winget install OpenJS.NodeJS.LTS
+
+# 또는 공식 사이트에서 다운로드
+# https://nodejs.org/ko/download/
+```
+
+**macOS:**
+```bash
+# Homebrew 사용
+brew install node
+
+# 또는 공식 사이트에서 다운로드
+# https://nodejs.org/ko/download/
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+# NodeSource 저장소 추가
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+---
+
+### 방법 1: 브라우저 DB 모드 (권장 - 가장 간단)
+
+서버 없이 브라우저에서 모든 것이 실행됩니다. **PostgreSQL 설치 불필요!**
+
+#### Step 1: 저장소 클론
+
+```bash
+git clone https://github.com/Cloud-Linuxer/sql-study.git
+cd sql-study
+```
+
+#### Step 2: 의존성 설치
+
+```bash
+npm install
+```
+
+설치되는 주요 패키지:
+- `react`, `react-dom` - UI 라이브러리
+- `@monaco-editor/react` - SQL 에디터
+- `sql.js` - 브라우저용 SQLite
+- `papaparse` - CSV 파싱
+
+#### Step 3: 데이터 파일 준비
+
+**중요**: 대용량 데이터 파일은 GitHub에 포함되어 있지 않습니다.
+
+```bash
+# public/data 디렉토리 생성 (없는 경우)
+mkdir -p public/data
+
+# 데이터 다운로드 (공공데이터포털에서)
+# https://www.data.go.kr/data/15083033/fileData.do
+# 다운로드 후 public/data/store_data.csv로 저장
+```
+
+**또는 샘플 데이터로 테스트:**
+
+```bash
+# 샘플 데이터 생성 (테스트용)
+cat > public/data/store_data.csv << 'EOF'
+상가업소번호,상호명,지점명,상권업종대분류코드,상권업종대분류명,상권업종중분류코드,상권업종중분류명,상권업종소분류코드,상권업종소분류명,표준산업분류코드,표준산업분류명,시도코드,시도명,시군구코드,시군구명,행정동코드,행정동명,법정동코드,법정동명,지번코드,대지구분코드,대지구분명,지번본번지,지번부번지,지번주소,도로명코드,도로명,건물본번지,건물부번지,건물관리번호,건물명,도로명주소,구우편번호,신우편번호,동정보,층정보,호정보,경도,위도
+MA0101202208003882516,스타벅스,강남역점,Q,음식,Q01,커피점/카페,Q01A01,커피전문점/카페/다방,I56220,커피 전문점,11,서울특별시,11680,강남구,1168053000,역삼1동,1168010100,역삼동,116801010,1,대지,736,5,서울특별시 강남구 역삼동 736-5,116804163203,테헤란로,142,,1168010100107360005000001,강남빌딩,서울특별시 강남구 테헤란로 142,135080,06236,1층,1층,,127.0366,37.5001
+MA0101202208003882799,이디야커피,선릉역점,Q,음식,Q01,커피점/카페,Q01A01,커피전문점/카페/다방,I56220,커피 전문점,11,서울특별시,11680,강남구,1168054000,삼성1동,1168010600,삼성동,116801060,1,대지,159,3,서울특별시 강남구 삼성동 159-3,116804166019,선릉로,525,,1168010600101590003000001,선릉빌딩,서울특별시 강남구 선릉로 525,135090,06159,1층,1층,,127.0486,37.5047
+EOF
+```
+
+#### Step 4: 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+출력 예시:
+```
+  VITE v5.4.21  ready in 105 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.x.x:5173/
+```
+
+#### Step 5: 브라우저에서 접속
+
+브라우저를 열고 `http://localhost:5173` 접속
+
+**초기 로딩 시간**: 데이터 크기에 따라 5-30초 소요 (브라우저에서 SQLite DB 생성)
+
+---
+
+### 방법 2: PostgreSQL API 모드 (대용량 데이터용)
+
+53만 건 전체 데이터를 빠르게 처리하려면 PostgreSQL 사용을 권장합니다.
+
+#### Step 1: PostgreSQL 설치
+
+**Windows:**
+```powershell
+# Chocolatey 사용
+choco install postgresql
+
+# 또는 공식 설치 프로그램
+# https://www.postgresql.org/download/windows/
+```
+
+**macOS:**
+```bash
+brew install postgresql@15
+brew services start postgresql@15
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+```
+
+#### Step 2: 데이터베이스 생성
+
+```bash
+# PostgreSQL 접속
+sudo -u postgres psql
+
+# 데이터베이스 및 사용자 생성
+CREATE DATABASE sql_study;
+CREATE USER sql_user WITH ENCRYPTED PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE sql_study TO sql_user;
+\q
+```
+
+#### Step 3: 저장소 클론 및 설정
+
+```bash
+git clone https://github.com/Cloud-Linuxer/sql-study.git
+cd sql-study
+
+# 서버 환경 설정
+cd server
+cp .env.example .env
+```
+
+#### Step 4: 환경 변수 설정
+
+`server/.env` 파일 편집:
+
+```env
+# 데이터베이스 설정
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=sql_study
+DB_USER=sql_user
+DB_PASSWORD=your_password
+
+# 서버 설정
+PORT=3001
+
+# Google OAuth (선택사항 - 인증 기능 사용 시)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+SESSION_SECRET=random_session_secret_string
+```
+
+#### Step 5: 데이터 임포트
+
+```bash
+# CSV 데이터를 PostgreSQL로 임포트
+psql -U sql_user -d sql_study -c "
+CREATE TABLE stores (
+    상가업소번호 VARCHAR(50) PRIMARY KEY,
+    상호명 VARCHAR(200),
+    지점명 VARCHAR(100),
+    상권업종대분류코드 VARCHAR(10),
+    상권업종대분류명 VARCHAR(50),
+    상권업종중분류코드 VARCHAR(10),
+    상권업종중분류명 VARCHAR(50),
+    상권업종소분류코드 VARCHAR(10),
+    상권업종소분류명 VARCHAR(100),
+    시도명 VARCHAR(20),
+    시군구명 VARCHAR(20),
+    행정동명 VARCHAR(50),
+    법정동명 VARCHAR(50),
+    도로명주소 VARCHAR(200),
+    경도 DECIMAL(10, 6),
+    위도 DECIMAL(10, 6)
+);
+"
+
+# CSV 임포트 (COPY 명령 사용)
+psql -U sql_user -d sql_study -c "\COPY stores FROM 'public/data/store_data.csv' WITH CSV HEADER"
+```
+
+#### Step 6: 서버 실행
+
+```bash
+# 터미널 1: 백엔드 서버
+cd server
+npm install
+npm start
+
+# 터미널 2: 프론트엔드
+cd ..
+npm install
+npm run dev
+```
+
+#### Step 7: 접속
+
+- 프론트엔드: `http://localhost:5173`
+- API 서버: `http://localhost:3001`
+
+---
+
+### 방법 3: Docker로 실행 (가장 편리)
+
+Docker가 설치되어 있다면 한 번에 모든 환경을 구성할 수 있습니다.
+
+```bash
+# 저장소 클론
+git clone https://github.com/Cloud-Linuxer/sql-study.git
+cd sql-study
+
+# Docker Compose로 실행 (PostgreSQL + API + Frontend)
+docker-compose up -d
+
+# 접속
+# http://localhost:5173
+```
+
+**docker-compose.yml** (프로젝트에 없다면 생성):
+
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: sql_study
+      POSTGRES_USER: sql_user
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build: ./server
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: sql_study
+      DB_USER: sql_user
+      DB_PASSWORD: password123
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+
+  frontend:
+    build: .
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+```
+
+---
+
+### 배포 방법
+
+#### Vercel 배포 (프론트엔드 - 브라우저 DB 모드)
+
+```bash
+# Vercel CLI 설치
+npm install -g vercel
+
+# 배포
+vercel
+
+# 환경 변수 설정 (Vercel 대시보드에서)
+# - 없음 (브라우저 DB 모드는 환경 변수 불필요)
+```
+
+#### Netlify 배포
+
+```bash
+# Netlify CLI 설치
+npm install -g netlify-cli
+
+# 빌드
+npm run build
+
+# 배포
+netlify deploy --prod --dir=dist
+```
+
+#### 자체 서버 배포 (Nginx + PM2)
+
+```bash
+# 빌드
+npm run build
+
+# Nginx 설정 (/etc/nginx/sites-available/sql-study)
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/sql-study/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+# API 서버 (PM2로 실행)
+cd server
+pm2 start server.js --name sql-study-api
+pm2 save
+```
+
+---
+
+## 문제 해결 (Troubleshooting)
+
+### 자주 발생하는 문제
+
+#### 1. `npm install` 실패
+
+```bash
+# Node.js 버전 확인
+node --version  # 18.0.0 이상이어야 함
+
+# npm 캐시 정리 후 재시도
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+#### 2. 데이터 로딩 실패
+
+```bash
+# CSV 파일 존재 확인
+ls -la public/data/
+
+# 파일 인코딩 확인 (UTF-8이어야 함)
+file public/data/store_data.csv
+```
+
+#### 3. 브라우저에서 느린 로딩
+
+- 대용량 CSV 파일 사용 시 브라우저 DB 모드는 초기 로딩이 오래 걸림
+- **해결**: PostgreSQL API 모드 사용 권장
+
+#### 4. Monaco Editor 로딩 안됨
+
+```bash
+# Monaco Editor 재설치
+npm uninstall @monaco-editor/react monaco-editor
+npm install @monaco-editor/react monaco-editor
+```
+
+#### 5. CORS 에러 (API 모드)
+
+```javascript
+// server/server.js에서 CORS 설정 확인
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
+```
+
+---
+
+## 커스터마이징 가이드
+
+### 자신만의 데이터 사용하기
+
+1. **CSV 파일 준비**
+   - UTF-8 인코딩
+   - 첫 번째 행은 컬럼명
+   - `public/data/your_data.csv`로 저장
+
+2. **훅 수정** (`src/hooks/useDatabaseAPI.js`)
+   ```javascript
+   const CSV_PATH = '/data/your_data.csv';
+   const TABLE_NAME = 'your_table';
+   ```
+
+3. **예제 쿼리 수정** (`src/data/exampleQueries.js`)
+   - 테이블명과 컬럼명을 자신의 데이터에 맞게 수정
+
+4. **퀴즈 문제 수정** (`src/data/quizProblems.js`)
+   - 새로운 문제와 정답 쿼리 추가
+
+### 새로운 학습 레벨 추가
+
+`src/data/quizProblems.js`:
+
+```javascript
+export const quizProblems = [
+  // 기존 레벨들...
+
+  // 새 레벨 추가
+  {
+    level: 7,
+    title: "고급 JOIN",
+    problems: [
+      {
+        id: "7-1",
+        title: "다중 테이블 조인",
+        description: "여러 테이블을 조인하여 데이터를 결합하세요.",
+        difficulty: "hard",
+        hint: "LEFT JOIN과 INNER JOIN의 차이를 이해하세요.",
+        answerQuery: "SELECT ... FROM ... JOIN ..."
+      }
+    ]
+  }
+];
+```
+
+---
+
 ## 학습 커리큘럼
 
 ### Level 1: SQL 기초 (3문제)
@@ -98,7 +544,7 @@
 ### 출처
 - **제공**: 소상공인시장진흥공단
 - **데이터셋**: 상가(상권)정보
-- **출처**: [공공데이터포털](https://www.data.go.kr/)
+- **출처**: [공공데이터포털](https://www.data.go.kr/data/15083033/fileData.do)
 
 ### 데이터 규모
 | 항목 | 값 |
@@ -147,50 +593,6 @@
 |------|------|
 | sql.js | WebAssembly SQLite |
 | PapaParse | CSV 파싱 |
-
----
-
-## 설치 및 실행
-
-### 빠른 시작 (브라우저 DB 모드)
-
-```bash
-# 1. 저장소 클론
-git clone https://github.com/Cloud-Linuxer/sql-study.git
-cd sql-study
-
-# 2. 의존성 설치
-npm install
-
-# 3. 개발 서버 실행
-npm run dev
-```
-
-브라우저에서 `http://localhost:5173` 접속
-
-### API 모드 (PostgreSQL)
-
-```bash
-# 1. PostgreSQL 설정
-cd server
-cp .env.example .env
-# .env 파일 편집하여 DB 연결 정보 입력
-
-# 2. 서버 실행
-npm install
-npm start
-
-# 3. 프론트엔드 실행
-cd ..
-npm run dev
-```
-
-### 프로덕션 빌드
-
-```bash
-npm run build
-npm run preview
-```
 
 ---
 
@@ -333,11 +735,11 @@ sql-study/
 │   └── screenshot-practice.png    # 연습 모드 스크린샷
 ├── public/
 │   └── data/
-│       └── store_data.zip         # 상가정보 CSV (압축)
+│       └── store_data.csv         # 상가정보 CSV (별도 다운로드 필요)
 ├── server/                        # API 서버 (PostgreSQL 모드)
-│   ├── server.js
-│   ├── package.json
-│   └── .env.example
+│   ├── server.js                  # Express 서버
+│   ├── package.json               # 서버 의존성
+│   └── .env.example               # 환경 변수 템플릿
 ├── src/
 │   ├── components/
 │   │   ├── Header.jsx             # 앱 헤더
@@ -365,11 +767,11 @@ sql-study/
 │   ├── main.jsx                   # 엔트리 포인트
 │   └── index.css                  # 글로벌 스타일
 ├── backup/                        # DB 백업 스크립트
-├── package.json
-├── vite.config.js
-├── tailwind.config.js
+├── package.json                   # 프론트엔드 의존성
+├── vite.config.js                 # Vite 설정
+├── tailwind.config.js             # Tailwind 설정
 ├── CLAUDE.md                      # 프로젝트 설계 문서
-└── README.md
+└── README.md                      # 이 문서
 ```
 
 ---
@@ -388,6 +790,7 @@ sql-study/
 - [ ] 쿼리 결과 시각화 (차트)
 - [ ] 쿼리 공유 기능
 - [ ] 모바일 반응형 개선
+- [ ] Docker Compose 지원
 
 ---
 
