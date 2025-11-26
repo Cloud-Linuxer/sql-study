@@ -280,61 +280,96 @@ npm run dev
 
 ---
 
-### 방법 3: Docker로 실행 (가장 편리)
+### 방법 3: Docker Compose로 실행 (권장 - 가장 편리)
 
-Docker가 설치되어 있다면 한 번에 모든 환경을 구성할 수 있습니다.
+Docker가 설치되어 있다면 한 번에 모든 환경(MySQL + API + Frontend)을 구성할 수 있습니다.
+
+#### Step 1: Docker 설치 확인
 
 ```bash
-# 저장소 클론
-git clone https://github.com/Cloud-Linuxer/sql-study.git
-cd sql-study
-
-# Docker Compose로 실행 (PostgreSQL + API + Frontend)
-docker-compose up -d
-
-# 접속
-# http://localhost:5173
+docker --version        # Docker 20.10 이상
+docker-compose --version # Docker Compose 2.0 이상
 ```
 
-**docker-compose.yml** (프로젝트에 없다면 생성):
+**Docker 미설치 시:**
+- Windows/macOS: [Docker Desktop](https://www.docker.com/products/docker-desktop/) 설치
+- Linux: `curl -fsSL https://get.docker.com | sh`
+
+#### Step 2: 저장소 클론
+
+```bash
+git clone https://github.com/Cloud-Linuxer/sql-study.git
+cd sql-study
+```
+
+#### Step 3: Docker Compose 실행
+
+```bash
+# 전체 서비스 빌드 및 실행
+docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f
+```
+
+#### Step 4: 접속
+
+- **프론트엔드**: http://localhost:5173
+- **API 서버**: http://localhost:3001
+- **MySQL**: localhost:3306 (user: root, password: practice123)
+
+#### Step 5: 대용량 데이터 임포트 (선택)
+
+기본으로 15건의 샘플 데이터가 포함되어 있습니다. 53만 건 전체 데이터를 사용하려면:
+
+```bash
+# 1. 공공데이터포털에서 CSV 다운로드
+# https://www.data.go.kr/data/15083033/fileData.do
+
+# 2. 데이터 임포트 스크립트 실행
+docker exec -it sql-study-db mysql -uroot -ppractice123 naver_financial
+
+# MySQL 프롬프트에서:
+mysql> LOAD DATA LOCAL INFILE '/path/to/store_data.csv'
+       INTO TABLE stores
+       CHARACTER SET utf8mb4
+       FIELDS TERMINATED BY ','
+       OPTIONALLY ENCLOSED BY '"'
+       LINES TERMINATED BY '\n'
+       IGNORE 1 ROWS;
+```
+
+#### Docker 명령어 모음
+
+```bash
+# 서비스 시작
+docker-compose up -d
+
+# 서비스 중지
+docker-compose down
+
+# 서비스 재시작
+docker-compose restart
+
+# 로그 확인
+docker-compose logs -f [service_name]
+
+# 데이터 포함 완전 삭제
+docker-compose down -v
+
+# 컨테이너 접속
+docker exec -it sql-study-db bash      # MySQL 컨테이너
+docker exec -it sql-study-api sh       # API 컨테이너
+docker exec -it sql-study-frontend sh  # Frontend 컨테이너
+```
+
+#### docker-compose.yml 구조
 
 ```yaml
-version: '3.8'
-
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: sql_study
-      POSTGRES_USER: sql_user
-      POSTGRES_PASSWORD: password123
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  api:
-    build: ./server
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: sql_study
-      DB_USER: sql_user
-      DB_PASSWORD: password123
-    ports:
-      - "3001:3001"
-    depends_on:
-      - db
-
-  frontend:
-    build: .
-    ports:
-      - "5173:5173"
-    depends_on:
-      - api
-
-volumes:
-  postgres_data:
+  db:        # MySQL 8.0 데이터베이스
+  api:       # Express.js API 서버
+  frontend:  # React + Vite 프론트엔드
 ```
 
 ---
